@@ -74,21 +74,19 @@
  *         description: Notification not found
  */
 
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   createNotification,
   getNotifications,
   getNotificationById,
   updateNotification,
-} = require('../controllers/notificationController');
-const protect = require('../middlewares/authMiddleware');
+} = require("../controllers/notificationController");
+const protect = require("../middlewares/authMiddleware");
 
-router.post('/',protect, createNotification);
-router.get('/',protect, getNotifications);
-router.get('/:id',protect, getNotificationById);
-router.put('/:id',protect, updateNotification);
+router.post("/notifications", protect, createNotification);
+router.get("/notifications", protect, getNotifications);
+router.get("/notifications/:id", protect, getNotificationById);
+router.put("/:notifications/:id/read", protect, updateNotification);
 
 module.exports = router;
-

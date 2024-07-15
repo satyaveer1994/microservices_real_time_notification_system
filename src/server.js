@@ -1,6 +1,6 @@
-const app = require('./app');
-require('./realTimeServer'); 
-require('dotenv').config();
+const app = require("./app");
+require("./realTimeServer");
+require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 

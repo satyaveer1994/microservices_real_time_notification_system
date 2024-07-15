@@ -62,13 +62,13 @@
  *         description: Invalid email or password
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require('../controllers/authController');
-const bcrypt = require('bcryptjs');
+const authController = require("../controllers/authController");
+const bcrypt = require("bcryptjs");
 //const { registerUser, loginUser } = require('../controller/authController');
 
-router.post('/register',authController.registerUser);
-router.post('/login', authController.loginUser);
+router.post("/register", authController.registerUser);
+router.post("/login", authController.loginUser);
 
 module.exports = router;
