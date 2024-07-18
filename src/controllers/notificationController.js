@@ -6,7 +6,7 @@ exports.createNotification = async (req, res) => {
     const { message } = req.body;
 
     const notification = new Notification({
-      userId: req.user.id,
+      userId: req.user.id, // Use req.user.id since userId is now a String
       message,
     });
 
@@ -20,16 +20,17 @@ exports.createNotification = async (req, res) => {
   }
 };
 
-// Get all notifications with pagination
 exports.getNotifications = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const notifications = await Notification.find({ userId: req.user.id })
+    const query = { userId: req.user.id };
+
+    const notifications = await Notification.find(query)
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
 
-    const count = await Notification.countDocuments({ userId: req.user.id });
+    const count = await Notification.countDocuments(query);
 
     res.json({
       notifications,
@@ -47,11 +48,15 @@ exports.getNotificationById = async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
 
-    if (notification && notification.userId === req.user.id) {
-      res.json(notification);
-    } else {
-      res.status(404).json({ message: "Notification not found" });
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
     }
+
+    if (notification.userId !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    res.json(notification);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -62,13 +67,18 @@ exports.updateNotification = async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
 
-    if (notification && notification.userId === req.user.id) {
-      notification.read = true;
-      await notification.save();
-      res.json(notification);
-    } else {
-      res.status(404).json({ message: "Notification not found" });
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
     }
+
+    if (notification.userId !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    notification.read = true;
+    await notification.save();
+
+    res.json(notification);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

@@ -32,29 +32,50 @@ const connectQueue = (callback) => {
   connect();
 };
 
-const publishToQueue = (queue, message) => {
+const declareQueue = (queue, callback) => {
   if (!channel) {
-    console.error("Channel is not available. Message not sent:", message);
+    console.error("Channel is not available. Cannot declare queue:", queue);
     return;
   }
-  channel.sendToQueue(queue, Buffer.from(message));
+  channel.assertQueue(queue, { durable: false }, (err, ok) => {
+    if (err) {
+      console.error("Error declaring queue:", err);
+      return;
+    }
+    console.log(`Queue '${queue}' declared`);
+    callback();
+  });
+};
+
+const publishToQueue = (queue, message) => {
+  declareQueue(queue, () => {
+    if (!channel) {
+      console.error("Channel is not available. Message not sent:", message);
+      return;
+    }
+    channel.sendToQueue(queue, Buffer.from(message));
+    console.log(`Message sent to queue '${queue}':`, message);
+  });
 };
 
 const subscribeToQueue = (queue, callback) => {
-  if (!channel) {
-    console.error(
-      "Channel is not available. Cannot subscribe to queue:",
-      queue
+  declareQueue(queue, () => {
+    if (!channel) {
+      console.error(
+        "Channel is not available. Cannot subscribe to queue:",
+        queue
+      );
+      return;
+    }
+    channel.consume(
+      queue,
+      (msg) => {
+        callback(msg.content.toString());
+      },
+      { noAck: true }
     );
-    return;
-  }
-  channel.consume(
-    queue,
-    (msg) => {
-      callback(msg.content.toString());
-    },
-    { noAck: true }
-  );
+    console.log(`Subscribed to queue '${queue}'`);
+  });
 };
 
 module.exports = {

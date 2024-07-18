@@ -8,7 +8,8 @@ const notificationSchema = new mongoose.Schema({
     unique: true,
   },
   userId: {
-    type: String,
+    type: String, // Use String type to match the id in User model
+    ref: 'User',  // Reference to the User model
     required: true,
   },
   message: {
